@@ -17,6 +17,7 @@ var rename = flag.Bool("r", false, "rename files")
 var dayTime = flag.Bool("d", false, "also move to 'time of the day' folder")
 
 func main() {
+
 	usage := "Use flag -path to point to working directory \n" +
 		"Flag -f run job in different thread (more 4 not recommended) \n" +
 		"If you want to rename files in mm-hh-ss format use flag -r \n" +
