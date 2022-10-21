@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/perseptron/geotime"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -10,14 +11,16 @@ import (
 	"time"
 )
 
-var path = flag.String("path", ".", "working directory")
+var path = flag.String("p", ".", "working directory")
 var flows = flag.Int("f", 1, "number of parallel flows")
 var rename = flag.Bool("r", false, "rename files")
+var dayTime = flag.Bool("d", false, "also move to 'time of the day' folder")
 
 func main() {
 	usage := "Use flag -path to point to working directory \n" +
 		"Flag -f run job in different thread (more 4 not recommended) \n" +
-		"If you want to rename files in mm-hh-ss format use flag -r "
+		"If you want to rename files in mm-hh-ss format use flag -r \n" +
+		"To move into part of the day relative folder use -d\n"
 	fmt.Println(usage)
 	start := time.Now()
 	num := 0
@@ -85,11 +88,15 @@ func renMove(files []os.DirEntry, n chan int) {
 		hour := datetime.Hour()
 		minute := datetime.Minute()
 		second := datetime.Second()
+		dayPart := ""
+		if *dayTime {
+			dayPart = geotime.PartOfDay(49.84, 24.03, datetime, nil)
+		}
 		if *rename {
-			newPath = filepath.Join(*path, strconv.Itoa(year), month.String(), strconv.Itoa(day),
+			newPath = filepath.Join(*path, strconv.Itoa(year), month.String(), strconv.Itoa(day), dayPart,
 				fmt.Sprintf("%02d-%02d-%02d%s", hour, minute, second, filepath.Ext(file.Name())))
 		} else {
-			newPath = filepath.Join(*path, strconv.Itoa(year), month.String(), strconv.Itoa(day), file.Name())
+			newPath = filepath.Join(*path, strconv.Itoa(year), month.String(), strconv.Itoa(day), dayPart, file.Name())
 		}
 
 		if moveFile(filePath, newPath) != nil {
